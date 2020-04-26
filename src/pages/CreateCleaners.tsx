@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {
     IonContent,
     IonHeader,
@@ -12,13 +12,13 @@ import {
     IonButtons,
     IonMenuButton, IonModal, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
 } from '@ionic/react';
-
+import {useCamera, availableFeatures} from '@ionic/react-hooks/camera';
 import './style.css';
 import ApiService from "../api/base";
 import Menu from "../components/Menu";
-import {Plugins} from '@capacitor/core';
+import {Plugins, CameraResultType, CameraSource} from '@capacitor/core';
 
-const {Storage} = Plugins;
+const {Storage, Camera} = Plugins;
 
 export const CreateCleaners: React.FC = () => {
     const [name, setName] = useState<string>('');
@@ -28,8 +28,19 @@ export const CreateCleaners: React.FC = () => {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [servicePrice, setServicePrice] = useState<number>(0);
     const [serviceName, setServiceName] = useState<string>();
+    const [FileData, setFileData] = useState<any>();
+
     // const [image, setImage] = useState<any>();
 
+    const selectImages = (event: any) => {
+        let images = []
+        for (var i = 0; i < event.target.files.length; i++) {
+            images[i] = event.target.files.item(i);
+        }
+        images = images.filter(image => image.name.match(/\.(jpg|jpeg|png|gif)$/))
+        let message = `${images.length} valid image(s) selected`
+        setFileData(images[0])
+    }
 
     const create = async () => {
         let props = {name, description, gallery, services};
@@ -52,32 +63,24 @@ export const CreateCleaners: React.FC = () => {
         });
     }, []);
 
-    const addImage = ([image]: any) => {
+    const addImage = async (image: any) => {
         console.log('image', image);
-        let lReader = new FileReader();
-        lReader.onload = async () => {
-            // const dataUrl = e.target.result;
-            // this.setState({attachment: {uploaded: false, dataUrl}});
-            const data = new FormData();
-            data.append('media', image);
-            console.log('this 1');
-            const response = await ApiService.post({
-                resource: `cleaners/gallery`,
-                params: {
-                    file: image
-                }
-            });
-            console.log('response',response);
-        }
+        const response = await ApiService.post({
+            resource: `cleaners/gallery`,
+            params: {
+                file: image
+            }
+        });
+        console.log('response', response);
+    }
 
-        // const {data} = await ApiService.post({
-        //     resource: `cleaners/gallery`,
-        //     params: {
-        //         file: image
-        //     }
-        // });
-        // console.log('request', data)
-    };
+    // const {data} = await ApiService.post({
+    //     resource: `cleaners/gallery`,
+    //     params: {
+    //         file: image
+    //     }
+    // });
+    // console.log('request', data)
 
     const handleName = (event: string | any) => {
         setName(event.detail.value.trim());
@@ -113,8 +116,16 @@ export const CreateCleaners: React.FC = () => {
 
     const onChangeHandler = async (event: any) => {
         console.log(event.target.files);
+        setFileData(event.target.files[0]);
         let image = event.target.files;
-        await addImage(image);
+    };
+
+    const uploadImages = () => {
+        const data = new FormData();
+        console.log('data', data);
+        console.log('FileData', FileData);
+        data.append("image", FileData, FileData.name);
+        addImage(data);
     };
 
     return (
@@ -141,7 +152,13 @@ export const CreateCleaners: React.FC = () => {
                         </IonItem>
                         <IonItem>
                             {/*<IonInput onIonChange={handleGallery}/>*/}
-                            <input type="file" name="file" onChange={onChangeHandler}/>
+                            {/*{photo && <img alt="" src={photo.dataUrl} />}*/}
+                            <input
+                                type="file"
+                                onChange={selectImages}
+                                multiple
+                            />
+                            {/*<input type="file" name="file" onChange={onChangeHandler}/>*/}
                         </IonItem>
                         <IonItem>
                             <IonLabel onClick={openServices}>Services</IonLabel>
@@ -182,6 +199,9 @@ export const CreateCleaners: React.FC = () => {
                         </IonItem>
                     </IonModal>
                     <div className='ion-padding'>
+                        <IonButton expand="block" onClick={uploadImages}>
+                            add image
+                        </IonButton>
                         <IonButton expand="block" onClick={create}>
                             Create cleaner
                         </IonButton>
