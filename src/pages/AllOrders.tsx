@@ -12,7 +12,7 @@ import {
     IonCardTitle,
     IonCardContent,
     IonModal,
-    IonButton, IonRow, IonCol, IonGrid
+    IonButton, IonRow, IonCol, IonGrid, IonTextarea, IonLabel, IonInput
 } from '@ionic/react';
 import './style.css';
 import ApiService from "../api/base";
@@ -25,7 +25,14 @@ export const AllOrders: React.FC = () => {
 
     const [orders, setOrders] = useState<object[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
+    const [showModalRequest, setShowModalRequest] = useState<boolean>(false);
     const [order, setOrder] = useState<object | any>();
+    const [createdBy, setCreatedBy] = useState<string>();
+    const [orderName, setOrderName] = useState<string>();
+    const [price, setPrice] = useState<string>();
+    const [date, setDate] = useState<string>();
+    const [request, setRequest] = useState<string>();
+
 
     const getData = useCallback(async () => {
         const {value} = await Storage.get({key: 'token'});
@@ -35,6 +42,7 @@ export const AllOrders: React.FC = () => {
                 token: value
             }
         });
+        console.log(data);
         await setOrders(data);
     }, []);
 
@@ -46,9 +54,10 @@ export const AllOrders: React.FC = () => {
                 token: value,
                 order: {
                     _id: order._id,
-                    name: order.name,
-                    price: order.price,
+                    name: orderName,
+                    price: price,
                     status: status,
+                    comment: request,
                 }
             }
         });
@@ -64,6 +73,11 @@ export const AllOrders: React.FC = () => {
     };
 
     const returnOrder = (order: object) => {
+        setShowModalRequest(true);
+    };
+
+    const ShowModalRequest = () => {
+        setShowModalRequest(false);
         setShowModal(false);
         let status = 'return';
         updateOrder(order, status)
@@ -75,9 +89,33 @@ export const AllOrders: React.FC = () => {
         updateOrder(order, status)
     };
 
-    const showOrder = async (i: object) => {
+    const showOrder = async (i: any) => {
         setShowModal(true);
+        setCreatedBy(i.createdBy);
+        setOrderName(i.name);
+        setPrice(i.price);
+        setDate(i.createdDate);
         setOrder(i)
+    };
+
+    const handleRequest = (event: string | any) => {
+        setRequest(event.detail.value.trim());
+    };
+
+    const handleCreatedBy = (event: string | any) => {
+        setCreatedBy(event.detail.value.trim());
+    };
+
+    const handleOrderName = (event: string | any) => {
+        setOrderName(event.detail.value.trim());
+    };
+
+    const handlePrice = (event: string | any) => {
+        setPrice(event.detail.value.trim());
+    };
+
+    const handleDate = (event: string | any) => {
+        setDate(event.detail.value.trim());
     };
 
     return (
@@ -118,16 +156,20 @@ export const AllOrders: React.FC = () => {
                                         Cleaner: {order.cleaner.name}
                                     </IonItem>
                                     <IonItem>
-                                        Creation date: {order.createdDate}
+                                        <IonLabel position="floating">Created by</IonLabel>
+                                        <IonInput value={createdBy} onIonChange={handleCreatedBy}/>
                                     </IonItem>
                                     <IonItem>
-                                        Created by: {order.createdBy}
+                                        <IonLabel position="floating">Creation date</IonLabel>
+                                        <IonInput value={date} onIonChange={handleDate}/>
                                     </IonItem>
                                     <IonItem>
-                                        Order: {order.name}
+                                        <IonLabel position="floating">Order</IonLabel>
+                                        <IonInput value={orderName} onIonChange={handleOrderName}/>
                                     </IonItem>
                                     <IonItem>
-                                        Price: {order.price}
+                                        <IonLabel position="floating">Price</IonLabel>
+                                        <IonInput value={price} onIonChange={handlePrice}/>
                                     </IonItem>
                                     <IonItem>
                                         Status: {order.status}
@@ -152,6 +194,11 @@ export const AllOrders: React.FC = () => {
                                 </IonGrid>
                             </IonCard>
                         </div> : null}
+                    </IonModal>
+                    <IonModal isOpen={showModalRequest}>
+                        <IonItem>Please, enter your feedback.</IonItem>
+                        <IonTextarea value={request} onIonChange={handleRequest}/>
+                        <IonButton onClick={ShowModalRequest}>Send</IonButton>
                     </IonModal>
                 </IonContent>
             </div>

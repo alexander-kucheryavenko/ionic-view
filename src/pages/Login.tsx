@@ -41,7 +41,7 @@ const Login: React.FC = () => {
             key: 'token',
             value: data.token
         });
-        // window.location.href = 'http://localhost:3000/home';
+        window.location.href = 'http://localhost:3000/home';
     }, []);
 
     const handleLogin = (event: string | any) => {
@@ -71,7 +71,7 @@ const Login: React.FC = () => {
                     </IonItem>
                 </IonList>
                 <div className='ion-padding'>
-                    <IonButton expand="block" type="submit" routerLink='/home' onClick={signIn}>
+                    <IonButton expand="block" type="submit" onClick={signIn}>
                         Authorization
                     </IonButton>
                 </div>

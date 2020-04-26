@@ -49,7 +49,7 @@ export const Registration: React.FC = () => {
     }, []);
 
     const handleFirstName = (event: string | any) => {
-        setFirstName(event.detail.value);
+        setFirstName(event.detail.value.trim());
     };
     const handleLastName = (event: string | any) => {
         setLastName(event.detail.value.trim());
