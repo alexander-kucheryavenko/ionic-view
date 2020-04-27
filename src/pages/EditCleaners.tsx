@@ -17,8 +17,7 @@ import {
 } from '@ionic/react';
 import Menu from "../components/Menu";
 import ApiService from "../api/base";
-import {CameraResultType, Plugins} from '@capacitor/core';
-import {availableFeatures, useCamera} from "@ionic/react-hooks/camera";
+import {Plugins} from '@capacitor/core';
 
 const {Storage} = Plugins;
 
@@ -27,8 +26,6 @@ export const EditCleaners: React.FC = () => {
     const [cleaners, setCleaners] = useState<object[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
     const [showModalAddService, setShowModalAddService] = useState<boolean>(false);
-    const {photo, getPhoto} = useCamera();
-    const [availablePhoto, setAvailablePhoto] = useState<boolean>(false);
     const [name, setName] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [gallery, setGallery] = useState([]);
@@ -43,6 +40,7 @@ export const EditCleaners: React.FC = () => {
         setCleaner(i);
         setDescription(i.description);
         setName(i.name);
+        setGallery(i.gallery);
         setService(i.services);
     };
 
@@ -50,15 +48,16 @@ export const EditCleaners: React.FC = () => {
         const response = await ApiService.post({
             resource: `cleaners/gallery`,
             params: {
-                file: image
+                file: {
+                    dataUrl: image,
+                    format: 'png'
+                }
             }
         });
-        setAvailablePhoto(false);
         // @ts-ignore
         setGallery((prevState: SetStateAction<never[]>) => ([...prevState, response.data.path]));
         console.log('response', response.data.path);
     };
-    console.log('----->', gallery);
 
     const getData = useCallback(async () => {
         const {value} = await Storage.get({key: 'token'});
@@ -76,16 +75,19 @@ export const EditCleaners: React.FC = () => {
                                               description,
                                               gallery,
                                               services,
+                                              cleaner,
+                                              service
                                           }) => {
         const {value} = await Storage.get({key: 'token'});
-        const {data} = await ApiService.post({
+        services = service;
+        await ApiService.post({
             resource: `cleaners/update`,
             params: {
                 token: value,
-                cleaner: {name, description, gallery, services}
+                cleaner: {name, description, gallery, services, _id: cleaner._id}
             }
         });
-        await setCleaners(data);
+        getData();
     }, []);
 
     const handleName = (event: string | any) => {
@@ -119,28 +121,14 @@ export const EditCleaners: React.FC = () => {
         setServiceName('');
     };
 
-    const triggerCamera = useCallback(async () => {
-        if (availableFeatures.getPhoto) {
-            await getPhoto({
-                quality: 100,
-                allowEditing: false,
-                resultType: CameraResultType.DataUrl
-            });
-            setAvailablePhoto(true)
-        }
-    }, [getPhoto]);
-
-    const onClick = () => {
-        triggerCamera();
-    };
-
-    const uploadImages = () => {
-        addImage(photo);
-    };
-
     const removeService = () => {
         let a = service.slice(0, service.length - 1);
         setService(a);
+    };
+
+    const removeImage = () => {
+        let a = gallery.slice(0, gallery.length - 1);
+        setGallery(a);
     };
 
     const closeService = () => {
@@ -149,8 +137,24 @@ export const EditCleaners: React.FC = () => {
         setServiceName('');
     };
 
-    const confirmChanges = () => {
-        setShowModal(false)
+    const confirmChanges = async () => {
+        setShowModal(false);
+        let props = {name, description, gallery, services, cleaner, service};
+        await updateData(props);
+        setServices([]);
+        setService([]);
+    };
+
+    const readFile = (image: Blob) =>
+        new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.addEventListener('load', () => resolve(reader.result), false);
+            reader.readAsDataURL(image);
+        });
+
+    const uploadImagesWithComp = async (e: Blob) => {
+        const imageDataUrl = await readFile(e);
+        addImage(imageDataUrl);
     };
 
     useEffect(() => {
@@ -202,26 +206,31 @@ export const EditCleaners: React.FC = () => {
                                     <IonInput value={description} onIonChange={handleDescription}/>
                                 </IonItem>
                                 <IonItem>
-                                    {availableFeatures.getPhoto ? null : (
-                                        <input
-                                            type="file"
-                                            onChange={(e: any) => {
-                                                addImage(e.target.files[0]);
-                                            }}
-                                        />
+                                    <div className="fileUpload btn btn-primary">
+                                        <span>Upload Image</span>
+                                        <input type="file" className="upload" onChange={(e: any) => {
+                                            uploadImagesWithComp(e.target.files[0])
+                                        }}/>
+                                    </div>
+                                    {gallery && gallery.map((item: string | undefined, index: number) =>
+                                        gallery.length === index + 1 ?
+                                            <IonImg
+                                                className='last-image'
+                                                style={{width: "100px", height: "100px", marginLeft: ".75em"}}
+                                                src={item}
+                                                onClick={removeImage}
+                                            />
+                                            :
+                                            <IonImg
+                                                style={{width: "100px", height: "100px", marginLeft: ".75em"}}
+                                                src={item}
+                                            />
                                     )}
-                                    <IonButton style={{marginTop: ".75em"}} onClick={onClick}>
-                                        take photo
-                                    </IonButton>
-                                    {gallery && gallery.map((item) => <IonImg
-                                        style={{width: "100px", height: "100px", marginLeft: ".75em"}}
-                                        src={item}
-                                    />)}
                                 </IonItem>
                                 <IonItem>
                                     <IonLabel onClick={openServices}>Services</IonLabel>
                                 </IonItem>
-                                {service.map((item: any | undefined, index: any) => {
+                                {service.map((item: any | undefined, index: number) => {
                                     return (<IonItem>
                                         <IonGrid>
                                             <IonRow>

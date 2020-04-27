@@ -18,11 +18,10 @@ import {
     IonCardContent,
     IonImg,
 } from '@ionic/react';
-import {useCamera, availableFeatures} from '@ionic/react-hooks/camera';
 import './style.css';
 import ApiService from "../api/base";
 import Menu from "../components/Menu";
-import {Plugins, CameraResultType, CameraSource} from '@capacitor/core';
+import {Plugins} from '@capacitor/core';
 
 
 const {Storage} = Plugins;
@@ -35,21 +34,6 @@ export const CreateCleaners: React.FC = () => {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [servicePrice, setServicePrice] = useState<number>(0);
     const [serviceName, setServiceName] = useState<string>();
-    const [availablePhoto, setAvailablePhoto] = useState<boolean>(false);
-    const {photo, getPhoto} = useCamera();
-    // const [image, setImage] = useState<any>();
-
-
-    const triggerCamera = useCallback(async () => {
-        if (availableFeatures.getPhoto) {
-            await getPhoto({
-                quality: 100,
-                allowEditing: false,
-                resultType: CameraResultType.DataUrl
-            });
-            setAvailablePhoto(true)
-        }
-    }, [getPhoto]);
 
     const create = async () => {
         let props = {name, description, gallery, services};
@@ -80,15 +64,17 @@ export const CreateCleaners: React.FC = () => {
         const response = await ApiService.post({
             resource: `cleaners/gallery`,
             params: {
-                file: image
+                file: {
+                    dataUrl: image,
+                    format: 'png'
+                }
             }
         });
-        setAvailablePhoto(false)
         // @ts-ignore
-        setGallery((prevState: SetStateAction<never[]>) => ([...prevState, response.data.path]))
+        setGallery((prevState: SetStateAction<never[]>) => ([...prevState, response.data.path]));
         console.log('response', response.data.path);
-    }
-    console.log('----->', gallery)
+    };
+
     const handleName = (event: string | any) => {
         setName(event.detail.value.trim());
     };
@@ -121,13 +107,16 @@ export const CreateCleaners: React.FC = () => {
         setServiceName('');
     };
 
-    const onClick = () => {
-        triggerCamera();
+    const uploadImagesWithComp = async (e: Blob) => {
+        const imageDataUrl = await readFile(e);
+        addImage(imageDataUrl);
     };
-    const uploadImages = () => {
-        addImage(photo);
-    };
-
+    const readFile = (image: Blob) =>
+        new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.addEventListener('load', () => resolve(reader.result), false);
+            reader.readAsDataURL(image);
+        });
     return (
         <>
             <Menu/>
@@ -151,17 +140,12 @@ export const CreateCleaners: React.FC = () => {
                             <IonInput value={description} onIonChange={handleDescription}/>
                         </IonItem>
                         <IonItem>
-                            {availableFeatures.getPhoto ? null : (
-                                <input
-                                    type="file"
-                                    onChange={(e: any) => {
-                                        addImage(e.target.files[0]);
-                                    }}
-                                />
-                            )}
-                            <IonButton style={{marginTop: ".75em"}} onClick={onClick}>
-                                take photo
-                            </IonButton>
+                            <div className="fileUpload btn btn-primary">
+                                <span>Upload Image</span>
+                                <input type="file" className="upload" onChange={(e: any) => {
+                                    uploadImagesWithComp(e.target.files[0])
+                                }}/>
+                            </div>
                             {gallery && gallery.map((item) => <IonImg
                                 style={{width: "100px", height: "100px", marginLeft: ".75em"}}
                                 src={item}
@@ -206,9 +190,6 @@ export const CreateCleaners: React.FC = () => {
                         </IonItem>
                     </IonModal>
                     <div className='ion-padding'>
-                        {photo && availablePhoto && <IonButton expand="block" onClick={uploadImages}>
-                          add image
-                        </IonButton>}
                         <IonButton expand="block" onClick={create}>
                             Create cleaner
                         </IonButton>
