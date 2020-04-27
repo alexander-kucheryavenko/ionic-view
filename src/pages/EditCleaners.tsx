@@ -41,7 +41,6 @@ export const EditCleaners: React.FC = () => {
     const showCleaner = (e: any, i: any) => {
         setShowModal(true);
         setCleaner(i);
-        console.log(i);
         setDescription(i.description);
         setName(i.name);
         setService(i.services);
@@ -155,7 +154,6 @@ export const EditCleaners: React.FC = () => {
     };
 
     useEffect(() => {
-        console.log(service.length);
         getData();
     }, [getData, service, services, cleaner]);
 
