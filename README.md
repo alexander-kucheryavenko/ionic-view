@@ -5,4 +5,8 @@
 + installed node_modules
   + npm install
 
-Then use "npm run start" and we can use the app. 
+After that, we can launch the app using
+```
+npm run start 
+```
+
