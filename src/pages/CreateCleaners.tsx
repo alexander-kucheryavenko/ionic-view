@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useEffect, SetStateAction} from 'react';
+import React, {useState, useCallback, SetStateAction} from 'react';
 import {
     IonContent,
     IonHeader,
@@ -16,7 +16,7 @@ import {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonIcon, IonImg,
+    IonImg,
 } from '@ionic/react';
 import {useCamera, availableFeatures} from '@ionic/react-hooks/camera';
 import './style.css';
@@ -54,6 +54,10 @@ export const CreateCleaners: React.FC = () => {
     const create = async () => {
         let props = {name, description, gallery, services};
         await requestData(props);
+        setName('');
+        setDescription('');
+        setServices([]);
+        setGallery([]);
     };
 
     const requestData = useCallback(async ({

@@ -23,6 +23,7 @@ import Users from "./pages/Users";
 import Orders from "./pages/Orders";
 import AllOrders from "./pages/AllOrders";
 import ChangePassword from "./pages/ChangePassword";
+import EditCleaners from "./pages/EditCleaners";
 
 import '@ionic/react/css/core.css';
 
@@ -65,6 +66,7 @@ const App: React.FC = () => {
                             <Route path="/update-password" component={ChangePassword}/>
                             <Route path="/home" component={Home} exact={true}/>
                             <Route path="/cleaners" component={Cleaners}/>
+                            <Route path="/edit-cleaners" component={EditCleaners}/>
                             <Route path="/users" component={Users}/>
                             <Route path="/create_cleaners" component={CreateCleaners}/>
                             <Route path="/orders" component={Orders}/>

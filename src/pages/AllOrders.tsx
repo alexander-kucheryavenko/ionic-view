@@ -42,7 +42,6 @@ export const AllOrders: React.FC = () => {
                 token: value
             }
         });
-        console.log(data);
         await setOrders(data);
     }, []);
 
@@ -62,7 +61,7 @@ export const AllOrders: React.FC = () => {
             }
         });
         getData();
-    }, [getData]);
+    }, [getData, orderName, price, request]);
 
     useEffect(() => {
         getData();

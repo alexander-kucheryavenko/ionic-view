@@ -61,6 +61,9 @@ export const Menu: React.FC = () => {
                                     <IonItem href="/all_orders">
                                         <IonLabel>All orders</IonLabel>
                                     </IonItem>
+                                    <IonItem href="/edit-cleaners">
+                                        <IonLabel>Edit cleaners</IonLabel>
+                                    </IonItem>
                                 </div>
                             )
                             :

@@ -117,6 +117,9 @@ export const Orders: React.FC = () => {
                                         <IonItem>
                                             Status: {order.status}
                                         </IonItem>
+                                        <IonItem>
+                                            Message: {order.message ? order.message : 'no message'}
+                                        </IonItem>
                                     </IonCardContent>
                                     <IonGrid>
                                         <IonRow>
