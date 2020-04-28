@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 
-const api = `http://localhost:8000/`;
+const api = `https://node-api-ionic.herokuapp.com/`;
 const ApiService = {
     init() {
         axios.interceptors.request.use(async (config) => {
