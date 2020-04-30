@@ -16,6 +16,9 @@ npm run build
 sudo gem install cocoapods
 ```
 And install the Xcode Command Line tools (either from Xcode, or running `xcode-select --install`).
-Now you can run npx cap open ios to launch Xcode
+Now you can run 
+
+`npx cap open ios` to launch Xcode
+
 Connect you device and run this app.
 
