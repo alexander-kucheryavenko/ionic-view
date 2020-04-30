@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, Dispatch, SetStateAction} from 'react';
 import {
     IonContent,
     IonHeader,
@@ -13,10 +13,20 @@ import {
     IonInput,
     IonAlert,
 } from '@ionic/react';
-import './style.css';
+import {Plugins} from '@capacitor/core';
+
 import ApiService from "../api/base";
 
-export const Registration: React.FC = () => {
+import './style.css';
+
+const {Storage} = Plugins;
+
+interface ChildComponentProps {
+    setToken: Dispatch<SetStateAction<string | null | undefined>>
+}
+
+
+export const Registration: React.FC<ChildComponentProps> = ({setToken}) => {
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
@@ -40,12 +50,19 @@ export const Registration: React.FC = () => {
                                                password,
                                                wantBeAdmin,
                                            }) => {
-        await ApiService.post({
+        const {data} = await ApiService.post({
             resource: `auth/registration`,
             params: {
                 user: {firstName, lastName, email, password, wantBeAdmin}
             }
         });
+        await Storage.set({
+            key: 'token',
+            value: data.token
+        });
+        setTimeout(() => {
+            setToken(data.token)
+        }, 3000)
     }, []);
 
     const handleFirstName = (event: string | any) => {
@@ -135,7 +152,7 @@ export const Registration: React.FC = () => {
                         setShowAlert(false)
                     }}
                     header={'Verify your account'}
-                    message={'An email has been sent to your mail with a link to confirm your account.'}
+                    message={`An email has been sent to your mail:${validEmail} with a link to confirm your account.`}
                     buttons={['OK']}
                 />
             </IonContent>
