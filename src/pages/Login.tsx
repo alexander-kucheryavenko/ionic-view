@@ -1,4 +1,9 @@
-import React, {useCallback, useState} from 'react';
+import React, {
+    Dispatch,
+    SetStateAction,
+    useCallback,
+    useState
+} from 'react';
 import {
     IonContent,
     IonHeader,
@@ -11,13 +16,19 @@ import {
     IonList,
     IonButton,
 } from '@ionic/react';
-import './style.css';
-import ApiService from "../api/base";
 import {Plugins} from '@capacitor/core';
+
+import ApiService from "../api/base";
+
+import './style.css';
 
 const {Storage} = Plugins;
 
-const Login: React.FC = () => {
+interface ChildComponentProps {
+    setToken: Dispatch<SetStateAction<string | null | undefined>>
+}
+
+const Login: React.FunctionComponent<ChildComponentProps> = ({setToken}) => {
 
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -41,7 +52,7 @@ const Login: React.FC = () => {
             key: 'token',
             value: data.token
         });
-        window.location.href = 'http://localhost:3000/home';
+        setToken(data.token)
     }, []);
 
     const handleLogin = (event: string | any) => {
@@ -59,7 +70,7 @@ const Login: React.FC = () => {
                     <IonTitle>Login Page</IonTitle>
                 </IonToolbar>
             </IonHeader>
-            <IonContent>
+            <IonContent className="ion-padding">
                 <IonList>
                     <IonItem>
                         <IonLabel position="floating">Login</IonLabel>

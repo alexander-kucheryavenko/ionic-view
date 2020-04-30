@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {SetStateAction, useCallback, useEffect, useState} from 'react';
 import {Redirect, Route} from 'react-router-dom';
 import {
     IonApp,
@@ -7,7 +7,8 @@ import {
     IonRouterOutlet,
     IonTabBar,
     IonTabButton,
-    IonTabs
+    IonTabs,
+    IonPage
 } from '@ionic/react';
 import {Plugins} from '@capacitor/core';
 
@@ -53,44 +54,50 @@ const App: React.FC = () => {
 
         useEffect(() => {
             getData();
-        }, [getData]);
-
+        }, [getData, token]);
         return (
             <IonApp>
                 <IonReactRouter>
-                    <IonTabs>
-                        <IonRouterOutlet>
-                            <Route path="/login" render={() => <Login/>} exact={true}/>
-                            <Route path="/registration" component={Registration} exact={true}/>
-                            <Route path="/remind_password" component={RemindPassword}/>
-                            <Route path="/update-password" component={ChangePassword}/>
-                            <Route path="/home" component={Home} exact={true}/>
-                            <Route path="/cleaners" component={Cleaners}/>
-                            <Route path="/edit-cleaners" component={EditCleaners}/>
-                            <Route path="/users" component={Users}/>
-                            <Route path="/create_cleaners" component={CreateCleaners}/>
-                            <Route path="/orders" component={Orders}/>
-                            <Route path="/all_orders" component={AllOrders}/>
-                            <Route path="/" render={() => <Redirect to="/login"/>} exact={true}/>
-                        </IonRouterOutlet>
-                        {token ? <IonTabBar slot="bottom"/>
-                            :
-                            <IonTabBar slot="bottom">
-                                <IonTabButton tab="login" href="/login">
-                                    <IonIcon icon={triangle}/>
-                                    <IonLabel>Login page</IonLabel>
-                                </IonTabButton>
-                                < IonTabButton tab="registration" href="/registration">
-                                    <IonIcon icon={triangle}/>
-                                    <IonLabel>Registration page</IonLabel>
-                                </IonTabButton>
-                                <IonTabButton tab="remind_password" href="/remind_password">
-                                    <IonIcon icon={triangle}/>
-                                    <IonLabel>Forget Password</IonLabel>
-                                </IonTabButton>
-                            </IonTabBar>
-                        }
-                    </IonTabs>
+                    <IonPage>
+
+                        <IonTabs>
+                            <IonRouterOutlet>
+                                <Route path="/login"
+                                       render={() => token ? <Redirect to="/home/"/> : <Login setToken={setToken}/>}
+                                       exact={true}/>
+                                <Route path="/registration"
+                                       render={() => token ? <Redirect to="/home/"/> : <Registration setToken={setToken}/>}
+                                       exact={true}/>
+                                <Route path="/remind_password" component={RemindPassword}/>
+                                <Route path="/update-password" component={ChangePassword}/>
+                                <Route path="/home/" component={Home} exact={true}/>
+                                <Route path="/cleaners" component={Cleaners}/>
+                                <Route path="/edit-cleaners" component={EditCleaners}/>
+                                <Route path="/users" component={Users}/>
+                                <Route path="/create_cleaners" component={CreateCleaners}/>
+                                <Route path="/orders" component={Orders}/>
+                                <Route path="/all_orders" component={AllOrders}/>
+                                <Route path="/" render={() => <Redirect to="/login/"/>} exact={true}/>
+                            </IonRouterOutlet>
+                            {token ? <IonTabBar slot="bottom"/>
+                                :
+                                <IonTabBar slot="bottom">
+                                    <IonTabButton tab="login" href="/login">
+                                        <IonIcon icon={triangle}/>
+                                        <IonLabel>Login page</IonLabel>
+                                    </IonTabButton>
+                                    < IonTabButton tab="registration" href="/registration">
+                                        <IonIcon icon={triangle}/>
+                                        <IonLabel>Registration page</IonLabel>
+                                    </IonTabButton>
+                                    <IonTabButton tab="remind_password" href="/remind_password">
+                                        <IonIcon icon={triangle}/>
+                                        <IonLabel>Forget Password</IonLabel>
+                                    </IonTabButton>
+                                </IonTabBar>
+                            }
+                        </IonTabs>
+                    </IonPage>
                 </IonReactRouter>
             </IonApp>
         )
