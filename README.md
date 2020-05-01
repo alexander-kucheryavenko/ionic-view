@@ -10,7 +10,7 @@ After that, we can launch the app using
 npm run start 
 ```
 
-###Build IOS
+### Build IOS
 
 For build ios app you need use this command
 ```
@@ -24,7 +24,7 @@ Now you can run
 
 Connect you device and run this app.
 
-###Build Android
+### Build Android
 
 For build android app you need use this command
 ```
